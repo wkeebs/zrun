@@ -1,4 +1,4 @@
-# ZRun
+# ZRun 🏃‍♂️💨
 
 Training plan management application built with Next.js and Spring Boot.
 
