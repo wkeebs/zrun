@@ -28,6 +28,12 @@ Training plan management application built with Next.js and Spring Boot.
 
 ## Development Setup
 
+### Development URLs
+
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8080
+- MongoDB: mongodb://localhost:27017
+
 ### Prerequisites
 
 - Docker and Docker Compose
