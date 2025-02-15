@@ -37,7 +37,7 @@ public class HealthCheckController {
             // Database connectivity check
             long userCount = userRepository.count();
             healthInfo.put("databaseStatus", "CONNECTED");
-            healthInfo.put("totalUsers", userCount);
+            // healthInfo.put("totalUsers", userCount);
             
             // Memory information
             Runtime runtime = Runtime.getRuntime();
