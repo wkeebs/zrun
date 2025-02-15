@@ -13,12 +13,14 @@ Training plan management application built with Next.js and Spring Boot.
 ## Tech Stack
 
 ### Frontend
+
 - Next.js with TypeScript
 - Tailwind CSS for styling
 - Server-side rendering capabilities
 - Type-safe API integration
 
 ### Backend
+
 - Spring Boot (Java 17)
 - MongoDB for flexible data storage
 - Spring Security for authentication
@@ -27,6 +29,7 @@ Training plan management application built with Next.js and Spring Boot.
 ## Development Setup
 
 ### Prerequisites
+
 - Docker and Docker Compose
 - Node.js 18+
 - Java 17 (JDK)
@@ -36,17 +39,20 @@ Training plan management application built with Next.js and Spring Boot.
 ### Getting Started
 
 1. Clone the repository:
+
 ```bash
 git clone [repository-url]
 cd zrun
 ```
 
 2. Start the development environment:
+
 ```bash
 docker-compose up --build
 ```
 
 This will start:
+
 - MongoDB on port 27017
 - Spring Boot backend on port 8080
 - Next.js frontend on port 3000
@@ -54,6 +60,7 @@ This will start:
 ### Development Workflow
 
 The development environment is configured for hot-reloading:
+
 - Frontend changes will automatically refresh
 - Backend changes will trigger a Spring Boot restart
 - Database data persists between restarts
@@ -108,6 +115,7 @@ We welcome contributions to ZRun! Here's how you can help:
 ### Commit Messages
 
 Follow conventional commits format:
+
 - feat: New feature
 - fix: Bug fix
 - docs: Documentation changes
