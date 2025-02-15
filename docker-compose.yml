@@ -12,8 +12,8 @@ services:
 
   backend:
     build: 
-      context: .
-      dockerfile: backend.Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: zrun-backend
     ports:
       - "8080:8080"
@@ -24,20 +24,20 @@ services:
       - SPRING_DATA_MONGODB_DATABASE=zrun
       - SPRING_PROFILES_ACTIVE=dev
 
+
   frontend:
     build:
-      context: .
-      dockerfile: frontend.Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: zrun-frontend
-    ports:
-      - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    depends_on:
-      - backend
+    ports:
+      - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NODE_ENV=development
+    working_dir: /app
 
 volumes:
   mongodb_data:
