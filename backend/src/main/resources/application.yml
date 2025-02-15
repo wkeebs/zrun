@@ -12,7 +12,7 @@ zrun:
     name: ${ADMIN_NAME:Admin User}
   security:
     jwt:
-      secret: ${JWT_SECRET:DOcTB9oVaQSvdj8lheFfaDplZ5x7u1WD}
+      secret: ${JWT_SECRET}
       expiration: ${JWT_EXPIRATION:86400000} 
 
 server:
