@@ -1,0 +1,18 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:password@localhost:27017/zrun-test?authSource=admin
+  security:
+    user:
+      name: test
+      password: test
+
+zrun:
+  admin:
+    email: admin@test.com
+    password: test
+    name: Test Admin
+  security:
+    jwt:
+      secret: test-secret-key-for-jwt-generation-in-testing-environment
+      expiration: 86400000

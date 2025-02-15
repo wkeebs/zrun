@@ -1,13 +1,19 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://admin:password@localhost:27017/zrun
-  security:
-    user:
-      name: admin
-      password: admin  # temporary for testing
+      uri: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/${MONGODB_DATABASE}?authSource=admin
   application:
     name: zrun
+
+zrun:
+  admin:
+    email: ${ADMIN_EMAIL:admin@zrun.com}
+    password: ${ADMIN_PASSWORD:adminpass}
+    name: ${ADMIN_NAME:Admin User}
+  security:
+    jwt:
+      secret: ${JWT_SECRET:DOcTB9oVaQSvdj8lheFfaDplZ5x7u1WD}
+      expiration: ${JWT_EXPIRATION:86400000} 
 
 server:
   port: 8080
