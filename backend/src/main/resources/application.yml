@@ -1,0 +1,18 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:password@localhost:27017/zrun
+  security:
+    user:
+      name: admin
+      password: admin  # temporary for testing
+  application:
+    name: zrun
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.security: DEBUG
