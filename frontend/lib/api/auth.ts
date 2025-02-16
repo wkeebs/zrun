@@ -26,8 +26,14 @@ export const login = async (credentials: LoginFormValues): Promise<LoginResponse
     });
 
     if (!response.ok) {
-      const errorMessage = await response.text();
-      throw new ApiError(errorMessage, response.status);
+      if (response.status === 500) {
+        throw new ApiError('An internal server error occurred. Please try again later.', 500);
+      }
+      if (response.status === 401) {
+        throw new ApiError('Invalid email or password.', 401);
+      }
+      
+      throw new ApiError("Failed to log in.", response.status);
     }
 
     return response.json();
@@ -57,8 +63,14 @@ export const register = async (data: RegistrationRequest): Promise<LoginResponse
     });
 
     if (!response.ok) {
-      const errorMessage = await response.text();
-      throw new ApiError(errorMessage, response.status);
+      if (response.status === 500) {
+        throw new ApiError('An internal server error occurred. Please try again later.', 500);
+      }
+      if (response.status === 409) {
+        throw new ApiError('This email is already in use.', 409);
+      }
+
+      throw new ApiError("Failed to register.", response.status);
     }
 
     return response.json();

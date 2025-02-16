@@ -55,9 +55,7 @@ const RegisterForm = () => {
 
       await register(values);
       setSuccess(true);
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      router.push("/login");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
