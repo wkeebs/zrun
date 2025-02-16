@@ -4,9 +4,12 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import com.zrun.exception.JwtAuthenticationException;
+import com.zrun.model.User;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +49,21 @@ public class JwtTokenProvider {
             log.error("Error generating JWT token", e);
             throw new JwtAuthenticationException("Could not generate token");
         }
+    }
+
+    // New helper method to generate token directly from User entity
+    public String generateToken(User user) {
+        // Create UserPrincipal from User
+        UserPrincipal userPrincipal = UserPrincipal.build(user);
+        
+        // Create Authentication object
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            userPrincipal,
+            null,
+            userPrincipal.getAuthorities()
+        );
+
+        return generateToken(authentication);
     }
 
     public String getUserIdFromToken(String token) {

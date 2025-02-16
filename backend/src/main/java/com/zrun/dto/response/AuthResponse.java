@@ -6,6 +6,8 @@ import lombok.Data;
 
 import java.util.List;
 
+import com.zrun.model.Role;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -14,5 +16,5 @@ public class AuthResponse {
     @Builder.Default
     private String type = "Bearer";
     private String email;
-    private List<String> roles;
+    private List<Role> roles;
 }
