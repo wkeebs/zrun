@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import {
@@ -26,11 +26,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { type LoginFormValues } from "@/lib/validations/auth";
 import { login } from "@/lib/api/auth";
+import { useAuth, User } from "@/lib/context/auth-context";
 
 const LoginForm = () => {
   const router = useRouter();
   const [error, setError] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
+
+  const { login: loginUser } = useAuth();
 
   const form = useForm<LoginFormValues>({
     defaultValues: {
@@ -43,9 +46,14 @@ const LoginForm = () => {
     try {
       setError("");
       setLoading(true);
-      
+
       const response = await login(values);
-      router.push('/profile');
+
+      // set auth
+      const { email, roles, token } = response;
+      loginUser(token, { email, roles } as User);
+
+      router.push("/profile");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -79,11 +87,11 @@ const LoginForm = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         type="email"
-                        placeholder="Enter your email" 
+                        placeholder="Enter your email"
                         autoComplete="email"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -97,19 +105,19 @@ const LoginForm = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="Enter your password" 
+                      <Input
+                        type="password"
+                        placeholder="Enter your password"
                         autoComplete="current-password"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full"
                 disabled={loading}
                 aria-busy={loading}
@@ -121,10 +129,10 @@ const LoginForm = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            Don't have an account?{" "}
             <button
               type="button"
-              onClick={() => router.push('/register')}
+              onClick={() => router.push("/register")}
               className="text-primary hover:underline font-medium"
             >
               Sign up

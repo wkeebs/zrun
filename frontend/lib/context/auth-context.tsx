@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface User {
+export interface User {
   email: string;
   roles: string[];
 }
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Store in state
     setToken(newToken);
     setUser(userData);
-    
+
     // Store in sessionStorage
     sessionStorage.setItem('token', newToken);
     sessionStorage.setItem('user', JSON.stringify(userData));
