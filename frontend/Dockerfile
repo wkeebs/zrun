@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy package files first to leverage Docker cache
 COPY package.json pnpm-lock.yaml* ./
 
-# Install dependencies
-RUN pnpm install --no-frozen-lockfile
+# Install dependencies with strict lockfile
+RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the application
 COPY . .
@@ -22,5 +22,4 @@ RUN pnpm build
 # Expose the port Next.js runs on
 EXPOSE 3000
 
-# Start the application in development mode
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "start"]

@@ -12,6 +12,12 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
     env_file:
       - .env
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   backend:
     build: 
@@ -24,7 +30,8 @@ services:
       - ./backend:/app
       - ~/.m2:/root/.m2
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/${MONGODB_DATABASE}?authSource=admin
       - SPRING_DATA_MONGODB_DATABASE=${MONGODB_DATABASE}
@@ -37,6 +44,12 @@ services:
     env_file:
       - .env
     command: mvn spring-boot:run
+    healthcheck:
+      test: curl --fail http://localhost:8080/actuator/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
     build:
@@ -46,11 +59,34 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      # Add a volume for Next.js build cache
+      - next-cache:/app/.next/cache
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      # Frontend-specific environment variables
+      - NEXT_PUBLIC_API_URL=http://backend:8080
+      - NEXT_PUBLIC_API_VERSION=${API_VERSION:-v1}
+      - NEXT_PUBLIC_JWT_COOKIE_NAME=${JWT_COOKIE_NAME:-zrun_token}
+      - NEXT_PUBLIC_ENABLE_STRAVA=${ENABLE_STRAVA:-false}
+      - NEXT_PUBLIC_DEV_MODE=true
+    env_file:
+      - .env
     working_dir: /app
+    depends_on:
+      backend:
+        condition: service_healthy
+    # Add support for terminal input (useful for development)
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   mongodb_data:
+  next-cache: # Volume for Next.js build cache
