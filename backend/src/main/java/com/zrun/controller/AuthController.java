@@ -79,7 +79,7 @@ public class AuthController {
             // Log failed attempt (but don't expose too much information)
             log.warn("Failed login attempt for user: {}", loginRequest.getEmail());
             return ResponseEntity
-                    .badRequest()
+                    .status(401)
                     .body("Invalid email or password");
         } catch (Exception e) {
             // Log unexpected errors
