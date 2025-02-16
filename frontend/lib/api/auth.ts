@@ -1,28 +1,36 @@
-import { LoginFormValues, RegisterFormValues } from "@/lib/validations/auth";
+// lib/api/auth.ts
+import { LoginFormValues } from "@/lib/validations/auth";
 import { ApiError } from "@/lib/utils/error";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
-export const login = async (credentials: LoginFormValues) => {
+// Common headers for all auth requests
+const headers = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+};
+
+export interface LoginResponse {
+  token: string;
+  email: string;
+  roles: string[];
+}
+
+export const login = async (credentials: LoginFormValues): Promise<LoginResponse> => {
   try {
     const response = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(credentials),
       credentials: 'include',
     });
 
     if (!response.ok) {
-      // Handle plain text error response
       const errorMessage = await response.text();
       throw new ApiError(errorMessage, response.status);
     }
 
-    // Handle successful JSON response
-    const data = await response.json();
-    return data;
+    return response.json();
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -33,14 +41,19 @@ export const login = async (credentials: LoginFormValues) => {
   }
 };
 
-export const register = async (data: RegisterFormValues) => {
+export interface RegistrationRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+export const register = async (data: RegistrationRequest): Promise<LoginResponse> => {
   try {
     const response = await fetch(`${API_BASE}/api/auth/register`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(data),
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -48,7 +61,7 @@ export const register = async (data: RegisterFormValues) => {
       throw new ApiError(errorMessage, response.status);
     }
 
-    return await response.json();
+    return response.json();
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
