@@ -11,6 +11,8 @@ import com.zrun.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,6 +22,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -106,5 +109,42 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authHeader) {
+        try {
+            // Extract token from Authorization header
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                log.warn("Invalid or missing Authorization header");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+
+            String jwt = authHeader.substring(7); // Remove "Bearer " prefix
+
+            // Validate the token
+            if (tokenProvider.validateToken(jwt)) {
+                // Token is valid, extract claims or user details
+                String userId = tokenProvider.getUserIdFromToken(jwt);
+
+                // Fetch user details to return in response
+                User user = userService.getUserById(userId);
+
+                // Prepare response with minimal user information
+                return ResponseEntity.ok(
+                        AuthResponse.builder()
+                                .email(user.getEmail())
+                                .roles(user.getRoles())
+                                .build());
+            }
+
+            // Token is invalid
+            log.warn("Token validation failed");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+
+        } catch (Exception e) {
+            log.error("Token validation error", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
+        }
     }
 }

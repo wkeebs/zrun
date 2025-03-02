@@ -26,7 +26,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { type LoginFormValues } from "@/lib/validations/auth";
 import { login } from "@/lib/api/auth";
-import { useAuth, User } from "@/lib/context/auth-context";
+import { useAuth, User } from "@/lib/auth/auth-context";
 
 const LoginForm = () => {
   const router = useRouter();

@@ -1,11 +1,14 @@
 "use client"
 
+import { FullPageLoader, LoadingSpinner } from "@/components/loading-spinner"
 import { TrainingPlanForm } from "@/components/plans/plan-form"
+import { useAuth } from "@/lib/auth/auth-context"
+import { withAuth } from "@/lib/auth/route-protection"
 import { TrainingPlanFormValues } from "@/lib/validations/plan"
 import { useState } from "react"
 import { toast } from "sonner"
 
-export default function NewPlanPage() {
+function NewPlanPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (values: TrainingPlanFormValues) => {
@@ -39,3 +42,5 @@ export default function NewPlanPage() {
     </div>
   )
 }
+
+export default withAuth(NewPlanPage);

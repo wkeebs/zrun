@@ -1,20 +1,19 @@
 "use client";
 
 import React from "react";
-import { useAuth } from "@/lib/context/auth-context";
+import { useAuth } from "@/lib/auth/auth-context";
+import { withAuth } from "@/lib/auth/route-protection";
+import ActionButton from "../action-button";
 
 const ProfilePage = () => {
   const { user, isAuthenticated, logout } = useAuth();
 
-  if (!user) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return <div>Not authenticated</div>;
-  }
-
-  return <div>{user?.email}</div>;
+  return (
+    <>
+      <div>Welcome, {user?.email}</div>
+      <ActionButton route="/plans/new">Create a Plan</ActionButton>
+    </>
+  );
 };
 
-export default ProfilePage;
+export default withAuth(ProfilePage);
