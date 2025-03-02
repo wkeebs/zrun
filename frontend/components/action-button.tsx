@@ -16,12 +16,10 @@ const ActionButton: React.FC<ActionButtonProps> = ({ children, className, route 
 
   return (
     <Button 
-      size="lg" 
       className={className}
       onClick={() => router.push(route)}
     >
       {children}
-      <ChevronRight className="ml-2 h-5 w-5" />
     </Button>
   );
 };

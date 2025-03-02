@@ -17,6 +17,7 @@ export interface LoginResponse {
 }
 
 export const login = async (credentials: LoginFormValues): Promise<LoginResponse> => {
+  console.log(API_BASE);
   try {
     const response = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
