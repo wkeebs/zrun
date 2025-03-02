@@ -59,7 +59,7 @@ export function UnitsProvider({ children }: { children: React.ReactNode }) {
   };
   
   // Format a distance with the appropriate unit label
-  const formatDistance = (distance: number, targetUnit?: DistanceUnit, decimals: number = 2): string => {
+  const formatDistance = (distance: number, targetUnit?: DistanceUnit, decimals: number = 3): string => {
     const unitToUse = targetUnit || unit;
     let formattedValue: string;
     

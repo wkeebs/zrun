@@ -68,7 +68,7 @@ export function DistanceInput({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="block text-sm font-medium text-neutral-600">
           {label} ({getUnitLabel(true)})
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -77,7 +77,7 @@ export function DistanceInput({
         <input
           type="number"
           id={id}
-          className="block w-full rounded-md border-gray-300 pl-3 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="block w-full rounded-md py-2 pl-3 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           placeholder="0.00"
           value={isNaN(displayValue) ? "" : displayValue}
           onChange={handleChange}
