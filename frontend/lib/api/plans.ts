@@ -1,8 +1,11 @@
 // src/lib/api/plans.ts
-import { TARGET_GOALS, TrainingPlanFormValues } from '@/components/plans/plan-form';
-import { ApiError, parseApiError } from '@/lib/utils/error';
-import { getAuthHeaders } from './auth';
-import { Workout } from '../types/workout';
+import {
+  TARGET_GOALS,
+  TrainingPlanFormValues,
+} from "@/components/plans/plan-form";
+import { ApiError, parseApiError } from "@/lib/utils/error";
+import { getAuthHeaders } from "./auth";
+import { Workout } from "../types/workout";
 
 export interface TrainingPlan {
   id: string;
@@ -11,7 +14,7 @@ export interface TrainingPlan {
   startDate: string;
   endDate: string;
   distanceKm: number;
-  targetGoal: typeof TARGET_GOALS[number];
+  targetGoal: (typeof TARGET_GOALS)[number];
   targetTime?: {
     hours: number;
     minutes: number;
@@ -23,7 +26,7 @@ export interface TrainingPlan {
   updatedAt: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export const planApi = {
   /**
@@ -37,8 +40,8 @@ export const planApi = {
       console.log(headers);
 
       const response = await fetch(`${API_BASE}/api/plans`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
         headers,
         body: JSON.stringify(plan),
       });
@@ -53,7 +56,7 @@ export const planApi = {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError('Network error when creating plan', 500);
+      throw new ApiError("Network error when creating plan", 500);
     }
   },
 
@@ -63,7 +66,7 @@ export const planApi = {
   async getPlans(): Promise<TrainingPlan[]> {
     try {
       const response = await fetch(`${API_BASE}/api/plans`, {
-        credentials: 'include',
+        credentials: "include",
         headers: await getAuthHeaders(),
       });
 
@@ -77,7 +80,29 @@ export const planApi = {
       if (error instanceof ApiError) {
         throw error;
       }
-      throw new ApiError('Network error when fetching plans', 500);
+      throw new ApiError("Network error when fetching plans", 500);
+    }
+  },
+
+  async getPlanById(planId: string): Promise<TrainingPlan> {
+    try {
+      const response = await fetch(`${API_BASE}/api/plans/${planId}`, {
+        method: "GET",
+        credentials: "include",
+        headers: await getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const apiError = await parseApiError(response);
+        throw apiError;
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError("Network error when fetching plan", 500);
     }
   },
 };
