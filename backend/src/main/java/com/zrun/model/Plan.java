@@ -19,14 +19,17 @@ public class Plan {
     private String id;
 
     private String userId;
-    private String name;
-    private Double totalDistance;
+    private String raceType; // "standard" or "custom"
+
+    // Goal and planning attributes
+    private String targetGoal; // "Personal Best", "First Time Finisher", etc.
+    private Integer trainingFrequency; // 3-6 days per week
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private String planType;
-    private String status;
+    private String planType; // Additional classification if needed
+    private String status; // e.g., "DRAFT", "ACTIVE", "COMPLETED"
 
     @Builder.Default
     private boolean enabled = true;

@@ -5,7 +5,6 @@ import com.zrun.exception.UserAlreadyExistsException;
 import com.zrun.model.Role;
 import com.zrun.model.User;
 import com.zrun.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;

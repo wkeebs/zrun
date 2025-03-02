@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -27,30 +27,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // Validation interval (30 minutes)
+  const VALIDATION_INTERVAL = 30 * 60 * 1000; 
+
   // Validate token on app initialization
   useEffect(() => {
     const validateToken = async () => {
-      const storedToken = sessionStorage.getItem('token');
-      const storedUser = sessionStorage.getItem('user');
-      
+      const storedToken = sessionStorage.getItem("token");
+      const storedUser = sessionStorage.getItem("user");
+      const lastValidationTime = sessionStorage.getItem("lastValidation");
+
       if (storedToken && storedUser) {
         try {
-          // Replace with your actual token validation endpoint
-          const response = await fetch(`${API_BASE}/api/auth/validate`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${storedToken}`,
-              'Content-Type': 'application/json'
-            }
-          });
+          // Determine if we need to validate
+          const shouldValidate =
+            !lastValidationTime ||
+            Date.now() - parseInt(lastValidationTime) > VALIDATION_INTERVAL;
 
-          if (response.ok) {
-            // Token is valid, set user and token
+          if (shouldValidate) {
+            // Replace with your actual token validation endpoint
+            const response = await fetch(`${API_BASE}/api/auth/validate`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${storedToken}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (response.ok) {
+              // Update last validation time
+              sessionStorage.setItem("lastValidation", Date.now().toString());
+
+              // Token is valid, set user and token
+              setToken(storedToken);
+              setUser(JSON.parse(storedUser));
+            } else {
+              // Token invalid, logout
+              logout();
+            }
+          } else {
+            // Use stored token without validation
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
-          } else {
-            // Token invalid, logout
-            logout();
           }
         } catch (error) {
           // Network error or validation failed
@@ -73,32 +91,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(userData);
 
     // Store in sessionStorage
-    sessionStorage.setItem('token', newToken);
-    sessionStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem("token", newToken);
+    sessionStorage.setItem("user", JSON.stringify(userData));
+
+    // Set initial validation time
+    sessionStorage.setItem("lastValidation", Date.now().toString());
   };
 
   const logout = () => {
     // Clear state
     setToken(null);
     setUser(null);
-    
+
     // Clear storage
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("lastValidation");
 
     // Redirect to login
-    router.push('/login');
+    router.push("/login");
   };
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        token, 
-        login, 
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        login,
         logout,
         isAuthenticated: !!token,
-        isLoading 
+        isLoading,
       }}
     >
       {children}
@@ -109,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

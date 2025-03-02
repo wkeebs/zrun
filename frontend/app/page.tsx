@@ -71,7 +71,7 @@ export default function LandingPage() {
 
         {/* CTA Button */}
         <ActionButton
-          route="/login"
+          route="/profile"
           className={`group relative px-8 py-6 bg-zinc-200 text-zinc-900 rounded-lg font-medium 
             border border-zinc-800 hover:bg-zinc-800 hover:border-zinc-700 hover:text-zinc-50
             transition-all duration-500 
