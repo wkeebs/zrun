@@ -49,18 +49,17 @@ import { useEffect } from "react";
 const RACE_DISTANCES = {
   "5k": 5,
   "10k": 10,
-  half_marathon: 21.0975,
-  marathon: 42.195,
+  "Half Marathon": 21.0975,
+  Marathon: 42.195,
   "50k": 50,
   "100k": 100,
 };
 
 // Define target goals
 const TARGET_GOALS = [
-  "Personal Best",
-  "First Time Finisher",
-  "Qualification Time",
   "Completion",
+  "Personal Best",
+  "Qualification Time",
 ] as const;
 
 // Define plan length options in weeks
@@ -73,49 +72,76 @@ const calculateEndDate = (planLength: number) => {
 // Define the form schema with Zod
 const formSchema = z
   .object({
-    name: z.string().nonempty({ message: "Please enter a plan name." }),
+    name: z.string().nonempty({ message: "Plan name is required." }),
 
     raceType: z.enum(["standard", "custom"], {
-      required_error: "Please select a race type.",
+      required_error: "Please select either a standard or custom race type.",
     }),
 
     // Detailed validation for race distances
     raceDistance: z
       .string({
-        required_error: "Please select a standard race distance.",
+        required_error: "Please select one of the standard race distances.",
       })
       .optional(),
 
     customDistance: z
       .number({
-        required_error: "Please enter a custom race distance.",
-        invalid_type_error: "Distance must be a number.",
+        required_error: "Please enter a distance for your custom race.",
+        invalid_type_error: "Race distance must be a valid number.",
       })
-      .min(0.1, { message: "Distance must be greater than 0." })
+      .min(0.1, { message: "Race distance must be greater than 0." })
       .optional(),
 
     targetGoal: z.enum(TARGET_GOALS, {
-      required_error: "Please select a target goal.",
+      required_error: "Please select a goal for your training plan.",
     }),
 
     planLengthType: z.enum(["startDate", "endDate"], {
-      required_error: "Please select a plan length type.",
+      required_error: "Please select either a start date or end date approach.",
     }),
 
-    trainingStartDate: z.date().optional(),
+    trainingStartDate: z
+      .date({
+        required_error: "Please select a start date for your training.",
+        invalid_type_error: "Invalid date format. Please select a valid date.",
+      })
+      .optional(),
 
-    trainingEndDate: z.date().optional(),
+    trainingEndDate: z
+      .date({
+        required_error: "Please select an end date for your training.",
+        invalid_type_error: "Invalid date format. Please select a valid date.",
+      })
+      .optional(),
 
     planLength: z
       .number()
       .refine((value) => PLAN_LENGTHS.includes(value as any), {
-        message: "Invalid plan length selected.",
+        message: "Please select one of the available plan lengths.",
       }),
 
     trainingFrequency: z
       .number()
-      .min(2, { message: "Minimum training frequency is 2 days per week." })
-      .max(7, { message: "Maximum training frequency is 7 days per week." }),
+      .min(1, { message: "You must train at least 1 day per week." })
+      .max(7, { message: "You cannot train more than 7 days per week." }),
+
+    targetTime: z
+      .object({
+        hours: z
+          .number()
+          .min(0, { message: "Hours cannot be negative." })
+          .max(99, { message: "Hours cannot exceed 99." }),
+        minutes: z
+          .number()
+          .min(0, { message: "Minutes cannot be negative." })
+          .max(59, { message: "Minutes must be between 0-59." }),
+        seconds: z
+          .number()
+          .min(0, { message: "Seconds cannot be negative." })
+          .max(59, { message: "Seconds must be between 0-59." }),
+      })
+      .optional(),
   })
   .superRefine((data, ctx) => {
     // Custom validation to ensure correct distance selection
@@ -123,7 +149,7 @@ const formSchema = z
       if (!data.raceDistance) {
         ctx.addIssue({
           code: "custom",
-          message: "Please select a standard race distance.",
+          message: "Please select one of the standard race distances.",
           path: ["raceDistance"],
         });
       }
@@ -131,7 +157,7 @@ const formSchema = z
       if (!data.customDistance || data.customDistance <= 0) {
         ctx.addIssue({
           code: "custom",
-          message: "Please enter a valid custom race distance.",
+          message: "Please enter a valid distance greater than 0.",
           path: ["customDistance"],
         });
       }
@@ -142,7 +168,7 @@ const formSchema = z
       if (!data.trainingStartDate) {
         ctx.addIssue({
           code: "custom",
-          message: "Please select a training start date.",
+          message: "Please select a start date for your training plan.",
           path: ["trainingStartDate"],
         });
       }
@@ -150,8 +176,26 @@ const formSchema = z
       if (!data.trainingEndDate) {
         ctx.addIssue({
           code: "custom",
-          message: "Please select a valid training end date.",
+          message: "Please select an end date for your training plan.",
           path: ["trainingEndDate"],
+        });
+      }
+    }
+
+    if (
+      data.targetGoal === "Personal Best" ||
+      data.targetGoal === "Qualification Time"
+    ) {
+      const { hours, minutes, seconds } = data.targetTime || {};
+
+      if (
+        (!hours && !minutes && !seconds) ||
+        (hours === 0 && minutes === 0 && seconds === 0)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Please enter a valid target time.",
+          path: ["targetTime"],
         });
       }
     }
@@ -187,6 +231,11 @@ export function TrainingPlanForm({
       trainingEndDate: calculateEndDate(12),
       planLength: 12,
       trainingFrequency: 4,
+      targetTime: {
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      },
     },
   });
 
@@ -196,12 +245,21 @@ export function TrainingPlanForm({
   const customDistance = form.watch("customDistance");
   const planLengthType = form.watch("planLengthType");
   const planLength = form.watch("planLength");
+  const targetGoal = form.watch("targetGoal");
 
   useEffect(() => {
     if (planLengthType === "endDate") {
       form.setValue("trainingEndDate", calculateEndDate(planLength));
     }
-  }, [planLength, planLengthType]);
+
+    if (targetGoal === "Completion") {
+      form.setValue("targetTime", {
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      });
+    }
+  }, [planLength, planLengthType, targetGoal]);
 
   // Get the selected distance in kilometers (for submission)
   const getDistanceInKm = (): number => {
@@ -596,6 +654,92 @@ export function TrainingPlanForm({
               )}
             />
 
+            {(targetGoal === "Personal Best" ||
+              targetGoal === "Qualification Time") && (
+              <FormField
+                control={form.control}
+                name="targetTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Target Time</FormLabel>
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormItem>
+                        <FormLabel>Hours</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            min={0}
+                            max={10}
+                            value={field.value?.hours ?? ""}
+                            onChange={(e) => {
+                              const value =
+                                e.target.value === ""
+                                  ? null
+                                  : Number(e.target.value);
+                              field.onChange({
+                                ...field.value,
+                                hours: value,
+                              });
+                            }}
+                          />
+                        </FormControl>
+                      </FormItem>
+                      <FormItem>
+                        <FormLabel>Minutes</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            min={0}
+                            max={59}
+                            value={field.value?.minutes ?? ""}
+                            onChange={(e) => {
+                              const value =
+                                e.target.value === ""
+                                  ? null
+                                  : Number(e.target.value);
+                              field.onChange({
+                                ...field.value,
+                                minutes: value,
+                              });
+                            }}
+                          />
+                        </FormControl>
+                      </FormItem>
+                      <FormItem>
+                        <FormLabel>Seconds</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            min={0}
+                            max={59}
+                            value={field.value?.seconds ?? ""}
+                            onChange={(e) => {
+                              const value =
+                                e.target.value === ""
+                                  ? null
+                                  : Number(e.target.value);
+                              field.onChange({
+                                ...field.value,
+                                seconds: value,
+                              });
+                            }}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+                    <FormDescription>
+                      Enter your target time for the race
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            
             {/* Training Frequency */}
             <FormField
               control={form.control}
@@ -608,7 +752,7 @@ export function TrainingPlanForm({
                       <Slider
                         value={[field.value]}
                         onValueChange={(values) => field.onChange(values[0])}
-                        min={2}
+                        min={1}
                         max={7}
                         step={1}
                       />

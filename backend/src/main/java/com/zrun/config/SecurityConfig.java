@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll() // Permit error pages
                         .requestMatchers("/actuator/**").permitAll() // Permit actuator endpoints
-                        .requestMatchers("/health", "/health/**").permitAll() // Allow health check endpoints
+                        .requestMatchers("/health", "/health/**").permitAll() // Explicitly allow all health endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
