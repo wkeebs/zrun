@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useUnits } from "@/lib/context/units-context";
-import { format } from "date-fns";
+import { format, addWeeks } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +42,8 @@ import {
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Slider } from "../ui/slider";
+import { Input } from "../ui/input";
+import { useEffect } from "react";
 
 // Define standard race distances in kilometers (our canonical format)
 const RACE_DISTANCES = {
@@ -61,9 +63,18 @@ const TARGET_GOALS = [
   "Completion",
 ] as const;
 
+// Define plan length options in weeks
+const PLAN_LENGTHS = [8, 12, 16, 20, 24] as const;
+
+const calculateEndDate = (planLength: number) => {
+  return addWeeks(new Date(), planLength);
+};
+
 // Define the form schema with Zod
 const formSchema = z
   .object({
+    name: z.string().nonempty({ message: "Please enter a plan name." }),
+
     raceType: z.enum(["standard", "custom"], {
       required_error: "Please select a race type.",
     }),
@@ -87,10 +98,19 @@ const formSchema = z
       required_error: "Please select a target goal.",
     }),
 
-    trainingStartDate: z.date({
-      required_error: "A training start date is required.",
-      invalid_type_error: "Please select a valid date.",
+    planLengthType: z.enum(["startDate", "endDate"], {
+      required_error: "Please select a plan length type.",
     }),
+
+    trainingStartDate: z.date().optional(),
+
+    trainingEndDate: z.date().optional(),
+
+    planLength: z
+      .number()
+      .refine((value) => PLAN_LENGTHS.includes(value as any), {
+        message: "Invalid plan length selected.",
+      }),
 
     trainingFrequency: z
       .number()
@@ -116,6 +136,25 @@ const formSchema = z
         });
       }
     }
+
+    // Validate date selection based on planLengthType
+    if (data.planLengthType === "startDate") {
+      if (!data.trainingStartDate) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Please select a training start date.",
+          path: ["trainingStartDate"],
+        });
+      }
+    } else if (data.planLengthType === "endDate") {
+      if (!data.trainingEndDate) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Please select a valid training end date.",
+          path: ["trainingEndDate"],
+        });
+      }
+    }
   });
 
 // TypeScript type for our form values
@@ -138,11 +177,15 @@ export function TrainingPlanForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "My Training Plan",
       raceType: "standard",
       raceDistance: "",
       customDistance: undefined,
       targetGoal: "Completion",
+      planLengthType: "startDate",
       trainingStartDate: new Date(),
+      trainingEndDate: calculateEndDate(12),
+      planLength: 12,
       trainingFrequency: 4,
     },
   });
@@ -151,6 +194,14 @@ export function TrainingPlanForm({
   const raceType = form.watch("raceType");
   const raceDistance = form.watch("raceDistance");
   const customDistance = form.watch("customDistance");
+  const planLengthType = form.watch("planLengthType");
+  const planLength = form.watch("planLength");
+
+  useEffect(() => {
+    if (planLengthType === "endDate") {
+      form.setValue("trainingEndDate", calculateEndDate(planLength));
+    }
+  }, [planLength, planLengthType]);
 
   // Get the selected distance in kilometers (for submission)
   const getDistanceInKm = (): number => {
@@ -168,17 +219,34 @@ export function TrainingPlanForm({
     // Get the distance in kilometers
     const distanceInKm = getDistanceInKm();
 
+    // Normalize dates based on planLengthType
+    const normalizedValues = { ...values };
+
+    if (planLengthType === "startDate") {
+      // Calculate end date based on start date and plan length
+      normalizedValues.trainingEndDate = addWeeks(
+        normalizedValues.trainingStartDate || new Date(),
+        values.planLength
+      );
+    } else {
+      // Calculate start date based on end date and plan length
+      normalizedValues.trainingStartDate = addWeeks(
+        normalizedValues.trainingEndDate || new Date(),
+        -values.planLength
+      );
+    }
+
     // Call the onSubmit prop if provided
     if (onSubmit) {
       onSubmit({
-        ...values,
+        ...normalizedValues,
         distanceInKm, // Add the canonical km value
       });
     }
 
     // For debugging
     console.log({
-      ...values,
+      ...normalizedValues,
       distanceInKm,
     });
   }
@@ -202,6 +270,26 @@ export function TrainingPlanForm({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6"
           >
+            {/* Plan Name */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plan Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="text"
+                      placeholder="Enter a plan name"
+                      className="input w-full"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* Race Type Tabs */}
             <FormField
               control={form.control}
@@ -304,6 +392,181 @@ export function TrainingPlanForm({
               />
             )}
 
+            {/* Plan Length Type */}
+            <FormField
+              control={form.control}
+              name="planLengthType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plan Length Selection</FormLabel>
+                  <FormControl>
+                    <Tabs
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Reset date fields when switching
+                        form.setValue("trainingStartDate", undefined);
+                        form.setValue("trainingEndDate", undefined);
+                      }}
+                      className="w-full"
+                    >
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="startDate">Start Date</TabsTrigger>
+                        <TabsTrigger value="endDate">End Date</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Plan Length */}
+            <FormField
+              control={form.control}
+              name="planLength"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plan Length</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select plan length" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PLAN_LENGTHS.map((length) => (
+                        <SelectItem key={length} value={length.toString()}>
+                          {length} Weeks
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    How long do you want your training plan to be?
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Training Start/End Date */}
+            {planLengthType === "startDate" ? (
+              <FormField
+                control={form.control}
+                name="trainingStartDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Training Start Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a start date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          defaultMonth={field.value || new Date()}
+                          disabled={(date) =>
+                            date < new Date() ||
+                            date >
+                              new Date(
+                                new Date().setFullYear(
+                                  new Date().getFullYear() + 1
+                                )
+                              )
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription>
+                      When do you want to start your training?
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="trainingEndDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Training End Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick an end date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          defaultMonth={field.value || new Date()}
+                          disabled={(date) => {
+                            const minDate = addWeeks(new Date(), planLength);
+
+                            const maxDate = new Date(
+                              new Date().setFullYear(
+                                new Date().getFullYear() + 1
+                              )
+                            );
+
+                            // Check if the date is outside the allowed range
+                            if (date < minDate || date > maxDate) {
+                              return true;
+                            }
+
+                            return false;
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription>
+                      When do you want to finish your training?
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             {/* Target Goal */}
             <FormField
               control={form.control}
@@ -327,58 +590,6 @@ export function TrainingPlanForm({
                   </Select>
                   <FormDescription>
                     What is your primary goal for this race?
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Training Start Date */}
-            <FormField
-              control={form.control}
-              name="trainingStartDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Training Start Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a start date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date() ||
-                          date >
-                            new Date(
-                              new Date().setFullYear(
-                                new Date().getFullYear() + 1
-                              )
-                            )
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    When do you want to start your training?
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
