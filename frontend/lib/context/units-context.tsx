@@ -2,6 +2,23 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+/**
+ * Removes trailing zeros from a number string
+ */
+export function removeTrailingZeros(numStr: string): string {
+  // Handle numbers with decimal point
+  if (numStr.includes('.')) {
+    // Remove trailing zeros after decimal
+    numStr = numStr.replace(/\.?0+$/, '');
+    
+    // If only the decimal point is left, remove it too
+    if (numStr.endsWith('.')) {
+      numStr = numStr.slice(0, -1);
+    }
+  }
+  return numStr;
+};
+
 // Define units type and conversion constants
 export type DistanceUnit = 'km' | 'mi';
 
@@ -59,7 +76,7 @@ export function UnitsProvider({ children }: { children: React.ReactNode }) {
   };
   
   // Format a distance with the appropriate unit label
-  const formatDistance = (distance: number, targetUnit?: DistanceUnit, decimals: number = 3): string => {
+  const formatDistance = (distance: number, targetUnit?: DistanceUnit, decimals: number = 4): string => {
     const unitToUse = targetUnit || unit;
     let formattedValue: string;
     
@@ -71,6 +88,9 @@ export function UnitsProvider({ children }: { children: React.ReactNode }) {
       const milesValue = distance * KM_TO_MILES;
       formattedValue = milesValue.toFixed(decimals);
     }
+
+    // Remove trailing zeros for cleaner display
+    formattedValue = removeTrailingZeros(formattedValue);
     
     return `${formattedValue} ${getUnitLabel(true, unitToUse)}`;
   };

@@ -1,5 +1,5 @@
 import React from "react";
-import { useUnits } from "@/lib/context/units-context";
+import { removeTrailingZeros, useUnits } from "@/lib/context/units-context";
 
 interface DistanceDisplayProps {
   /**
@@ -8,7 +8,7 @@ interface DistanceDisplayProps {
   value: number;
   
   /**
-   * Number of decimal places to display
+   * Maximum number of decimal places to display
    */
   decimals?: number;
   
@@ -33,15 +33,21 @@ export function DistanceDisplay({
   showUnit = true,
   className = ""
 }: DistanceDisplayProps) {
-  const { unit, formatDistance } = useUnits();
+  const { unit, getUnitLabel } = useUnits();
   
-  // Get formatted distance with user's preferred unit
-  const formattedDistance = formatDistance(value, undefined, decimals);
+  // Get the converted value based on user's unit preference
+  const convertedValue = unit === 'km' ? value : value * 0.621371;
   
-  // If showUnit is false, strip the unit part
+  // Format the number with specified decimal places
+  const formattedNumber = convertedValue.toFixed(decimals);
+  
+  // Remove trailing zeros for cleaner display
+  const cleanNumber = removeTrailingZeros(formattedNumber);
+  
+  // Assemble the final display value
   const displayValue = showUnit 
-    ? formattedDistance 
-    : formattedDistance.split(' ')[0];
+    ? `${cleanNumber} ${getUnitLabel(true)}` 
+    : cleanNumber;
   
   return (
     <span className={className}>
