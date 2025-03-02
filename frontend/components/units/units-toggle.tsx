@@ -1,18 +1,42 @@
 import React from "react";
 import { useUnits } from "@/lib/context/units-context";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
 
-export function UnitsToggle({ className = "" }: { className?: string }) {
-  const { unit, toggleUnit } = useUnits();
+interface UnitToggleProps {
+  className?: string;
+}
+
+export function UnitsToggle({ className = "" }: UnitToggleProps) {
+  const { unit, setUnit } = useUnits();
   
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={toggleUnit}
-      className={className}
+    <div 
+      className={cn(
+        "inline-flex rounded-lg border border-border overflow-hidden",
+        className
+      )}
+      role="radiogroup"
+      aria-label="Distance unit selection"
     >
-      {unit === 'km' ? 'Switch to Miles' : 'Switch to Kilometers'}
-    </Button>
+      <Button
+        variant={unit === "km" ? "default" : "ghost"}
+        type="button"
+        role="radio"
+        aria-checked={unit === "km" ? "true" : "false"}
+        onClick={() => setUnit("km")}
+      >
+        km
+      </Button>
+      <Button
+        variant={unit === "mi" ? "default" : "ghost"}
+        type="button"
+        role="radio"
+        aria-checked={unit === "mi" ? "true" : "false"}
+        onClick={() => setUnit("mi")}
+      >
+        mi
+      </Button>
+    </div>
   );
 }

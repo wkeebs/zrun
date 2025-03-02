@@ -11,8 +11,8 @@ export default function PlansLayout({
   return (
     <div className="min-h-screen">
       <div className="absolute top-0 right-0 p-4">
-        <UnitsToggle />
         <ThemeToggle />
+        <UnitsToggle />
       </div>
       {children}
     </div>
