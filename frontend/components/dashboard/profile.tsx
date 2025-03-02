@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "../ui/progress";
 
 interface UserStats {
   totalPlans: number;
@@ -29,16 +30,6 @@ interface Plan {
 
 type TabType = "overview" | "plans" | "stats";
 
-// Progress bar component
-const ProgressBar: React.FC<{ value: number }> = ({ value }) => (
-  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
-    <div 
-      className="bg-primary h-2.5 rounded-full" 
-      style={{ width: `${value}%` }}>
-    </div>
-  </div>
-);
-
 const ProfilePage: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
@@ -55,7 +46,7 @@ const ProfilePage: React.FC = () => {
 
   // Sample recent plans - replace with real data in production
   const recentPlans: Plan[] = [
-    { id: "plan1", name: "5K Training", startDate: "2025-01-15", endDate: "2025-03-01", progress: 100 },
+    { id: "67c46503b833bc37fa579a08", name: "My Training Plan", startDate: "2025-01-15", endDate: "2025-03-01", progress: 100 },
     { id: "plan2", name: "10K Prep", startDate: "2025-03-10", endDate: "2025-05-10", progress: 65 },
     { id: "plan3", name: "Marathon Training", startDate: "2025-05-15", endDate: "2025-09-15", progress: 20 }
   ];
@@ -186,7 +177,7 @@ const ProfilePage: React.FC = () => {
                             {plan.progress === 100 ? "Completed" : "In Progress"}
                           </Badge>
                         </div>
-                        <ProgressBar value={plan.progress} />
+                        <Progress value={plan.progress} className="my-4"/>
                         <div className="text-xs text-right text-muted-foreground">{plan.progress}% complete</div>
                       </div>
                     ))}
