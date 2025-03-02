@@ -46,24 +46,24 @@ import { Input } from "../ui/input";
 import { useEffect } from "react";
 
 // Define standard race distances in kilometers (our canonical format)
-const RACE_DISTANCES = {
+export const RACE_DISTANCES = {
   "5k": 5,
   "10k": 10,
   "Half Marathon": 21.0975,
-  Marathon: 42.195,
+  "Marathon": 42.195,
   "50k": 50,
   "100k": 100,
 };
 
 // Define target goals
-const TARGET_GOALS = [
+export const TARGET_GOALS = [
   "Completion",
   "Personal Best",
   "Qualification Time",
 ] as const;
 
 // Define plan length options in weeks
-const PLAN_LENGTHS = [8, 12, 16, 20, 24] as const;
+export const PLAN_LENGTHS = [8, 12, 16, 20, 24] as const;
 
 const calculateEndDate = (planLength: number) => {
   return addWeeks(new Date(), planLength);
@@ -202,11 +202,11 @@ const formSchema = z
   });
 
 // TypeScript type for our form values
-type FormValues = z.infer<typeof formSchema>;
+export type TrainingPlanFormValues = z.infer<typeof formSchema>;
 
 // Define the component props
 interface TrainingPlanFormProps {
-  onSubmit?: (values: FormValues & { distanceInKm: number }) => void;
+  onSubmit?: (values: TrainingPlanFormValues & { distanceInKm: number }) => void;
   isSubmitting?: boolean;
 }
 
@@ -218,7 +218,7 @@ export function TrainingPlanForm({
   const { unit, formatDistance } = useUnits();
 
   // Initialize form with React Hook Form and Zod resolver
-  const form = useForm<FormValues>({
+  const form = useForm<TrainingPlanFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "My Training Plan",
@@ -273,7 +273,7 @@ export function TrainingPlanForm({
   };
 
   // Handle form submission
-  function handleSubmit(values: FormValues) {
+  function handleSubmit(values: TrainingPlanFormValues) {
     // Get the distance in kilometers
     const distanceInKm = getDistanceInKm();
 
@@ -402,10 +402,10 @@ export function TrainingPlanForm({
                         <SelectItem value="10k">
                           10K ({formatDistanceLabel(10)})
                         </SelectItem>
-                        <SelectItem value="half_marathon">
+                        <SelectItem value="Half Marathon">
                           Half Marathon ({formatDistanceLabel(21.0975)})
                         </SelectItem>
-                        <SelectItem value="marathon">
+                        <SelectItem value="Marathon">
                           Marathon ({formatDistanceLabel(42.195)})
                         </SelectItem>
                         <SelectItem value="50k">
@@ -739,7 +739,7 @@ export function TrainingPlanForm({
               />
             )}
 
-            
+
             {/* Training Frequency */}
             <FormField
               control={form.control}
@@ -757,7 +757,7 @@ export function TrainingPlanForm({
                         step={1}
                       />
                       <div className="text-center text-sm text-muted-foreground">
-                        {field.value} days per week
+                        {field.value} day{field.value === 1 ? "" : "s"} per week
                       </div>
                     </div>
                   </FormControl>

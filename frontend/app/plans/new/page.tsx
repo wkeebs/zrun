@@ -1,46 +1,56 @@
-"use client"
+// src/app/plans/new/page.tsx
+"use client";
 
-import { FullPageLoader, LoadingSpinner } from "@/components/loading-spinner"
-import { TrainingPlanForm } from "@/components/plans/plan-form"
-import { useAuth } from "@/lib/auth/auth-context"
-import { withAuth } from "@/lib/auth/route-protection"
-import { TrainingPlanFormValues } from "@/lib/validations/plan"
-import { useState } from "react"
-import { toast } from "sonner"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { planApi } from "@/lib/api/plans";
+import { ApiError } from "@/lib/utils/error";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { TrainingPlanForm, TrainingPlanFormValues } from "@/components/plans/plan-form";
 
-function NewPlanPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export default function NewPlanPage() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (values: TrainingPlanFormValues) => {
-    setIsSubmitting(true)
-    
+  const handleSubmit = async (planData: TrainingPlanFormValues) => {
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      // Here you would call your API to create the plan
-      // const response = await createPlan(values)
+      // Call the API to create the plan
+      const createdPlan = await planApi.createPlan(planData);
       
-      // For now, we'll just simulate a successful API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Redirect to the plan details page
+      router.push(`/plans/${createdPlan.id}`);
+    } catch (err) {
+      console.error("Error creating plan:", err);
       
-      toast.success("Plan created", {
-        description: `Successfully created a new ${values.raceDistance} training plan.`,
-      })
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
       
-      // Redirect to plans page or the new plan's page
-      // router.push('/dashboard/plans')
-    } catch (error) {
-      toast.error("Error", {
-        description: "Failed to create the training plan. Please try again.",
-      })
-    } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <div className="container py-10 mx-auto">
-      <TrainingPlanForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+    <div className="container py-6 space-y-6 mx-auto">      
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      <TrainingPlanForm 
+        onSubmit={handleSubmit} 
+        isSubmitting={isSubmitting} 
+      />
     </div>
-  )
+  );
 }
-
-export default withAuth(NewPlanPage);

@@ -15,13 +15,36 @@ zrun:
     name: ${ADMIN_NAME:Admin User}
   security:
     jwt:
-      secret: ${JWT_SECRET}
+      secret: ${JWT_SECRET:v3ryS3cr3tK3yTh@tSh0uldB3L0ngEnoughForHS512Alg0r1thm}
       expiration: ${JWT_EXPIRATION:86400000} 
 
 server:
   port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
 
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+  info:
+    enabled: true
+
+# Logging Configuration
 logging:
   level:
+    root: INFO
     org.springframework.data.mongodb: DEBUG
     org.springframework.security: DEBUG
+    com.zrun: DEBUG
+    org.springframework.web: INFO

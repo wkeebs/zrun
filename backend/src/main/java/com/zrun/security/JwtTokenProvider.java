@@ -55,13 +55,12 @@ public class JwtTokenProvider {
     public String generateToken(User user) {
         // Create UserPrincipal from User
         UserPrincipal userPrincipal = UserPrincipal.build(user);
-        
+
         // Create Authentication object
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-            userPrincipal,
-            null,
-            userPrincipal.getAuthorities()
-        );
+                userPrincipal,
+                null,
+                userPrincipal.getAuthorities());
 
         return generateToken(authentication);
     }
@@ -79,6 +78,19 @@ public class JwtTokenProvider {
             log.error("Error extracting user ID from token", e);
             throw new JwtAuthenticationException("Could not extract user ID from token");
         }
+    }
+
+    /**
+     * Get user email from JWT token
+     */
+    public String getUserEmailFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
     }
 
     public boolean validateToken(String token) {
