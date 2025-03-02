@@ -5,7 +5,6 @@ import com.zrun.exception.UserAlreadyExistsException;
 import com.zrun.model.Role;
 import com.zrun.model.User;
 import com.zrun.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collections;
@@ -43,5 +42,15 @@ public class UserService {
         User savedUser = userRepository.save(user);
         log.info("Successfully registered new user: {}", savedUser.getEmail());
         return savedUser;
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
+    public User getUserById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 }

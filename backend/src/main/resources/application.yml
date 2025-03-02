@@ -20,8 +20,31 @@ zrun:
 
 server:
   port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
 
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+  info:
+    enabled: true
+
+# Logging Configuration
 logging:
   level:
+    root: INFO
     org.springframework.data.mongodb: DEBUG
     org.springframework.security: DEBUG
+    com.zrun: DEBUG
+    org.springframework.web: INFO
