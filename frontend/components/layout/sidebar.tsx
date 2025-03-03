@@ -35,8 +35,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       icon: Calendar,
-      label: "Workouts",
-      href: "/workouts",
+      label: "Calendar",
+      href: "/calendar",
     },
     {
       icon: BarChart2,
@@ -54,6 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         border-r 
         transition-all duration-300 ease-in-out
         flex flex-col
+        ${isCollapsed ? "rounded-r-xl" : ""}
         ${className || ""}
       `}
     >

@@ -9,11 +9,11 @@ interface UnitToggleProps {
 
 export function UnitsToggle({ className = "" }: UnitToggleProps) {
   const { unit, setUnit } = useUnits();
-  
+
   return (
-    <div 
+    <div
       className={cn(
-        "inline-flex rounded-lg border border-border overflow-hidden",
+        "inline-flex rounded-lg border border-border overflow-hidden h-8",
         className
       )}
       role="radiogroup"
@@ -25,6 +25,7 @@ export function UnitsToggle({ className = "" }: UnitToggleProps) {
         role="radio"
         aria-checked={unit === "km" ? "true" : "false"}
         onClick={() => setUnit("km")}
+        className="h-8 px-3 text-xs rounded-none"
       >
         km
       </Button>
@@ -34,6 +35,7 @@ export function UnitsToggle({ className = "" }: UnitToggleProps) {
         role="radio"
         aria-checked={unit === "mi" ? "true" : "false"}
         onClick={() => setUnit("mi")}
+        className="h-8 px-3 text-xs rounded-none"
       >
         mi
       </Button>

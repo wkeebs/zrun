@@ -13,9 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth/auth-context";
+import { UnitsToggle } from "../units/units-toggle";
+import { ThemeToggle } from "../theme/theme-toggle";
 
 export default function TopNav() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <nav className="w-full bg-background border-b px-6 py-3 flex items-center justify-between">
@@ -26,15 +28,8 @@ export default function TopNav() {
 
       {/* Navigation Actions */}
       <div className="flex items-center space-x-4">
-        {/* Notifications */}
-        <Button variant="ghost" size="icon">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-        </Button>
-
-        {/* Help */}
-        <Button variant="ghost" size="icon">
-          <HelpCircle className="h-5 w-5 text-muted-foreground" />
-        </Button>
+        <UnitsToggle />
+        <ThemeToggle />
 
         {/* User Profile Dropdown */}
         <DropdownMenu>
@@ -42,11 +37,11 @@ export default function TopNav() {
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage
-                  src={user?.avatarUrl || undefined}
-                  alt={`${user?.name}'s profile`}
+                //   src={user?.avatarUrl || undefined}
+                //   alt={`${user?.name}'s profile`}
                 />
                 <AvatarFallback>
-                  {user?.name ? user.name.charAt(0).toUpperCase() : ""}
+                  {/* {user?.name ? user.name.charAt(0).toUpperCase() : ""} */}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -54,7 +49,7 @@ export default function TopNav() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name}</p>
+                {/* <p className="text-sm font-medium leading-none">{user?.name}</p> */}
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>
@@ -75,14 +70,11 @@ export default function TopNav() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
-                // Implement logout
-              }}
+              onSelect={logout}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
