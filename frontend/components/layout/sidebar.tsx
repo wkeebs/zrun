@@ -52,9 +52,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         h-screen 
         bg-background 
         border-r 
+        shadow-xl
+        rounded-r-xl
         transition-all duration-300 ease-in-out
         flex flex-col
-        ${isCollapsed ? "rounded-r-xl" : ""}
         ${className || ""}
       `}
     >
