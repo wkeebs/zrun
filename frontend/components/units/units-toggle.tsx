@@ -1,5 +1,5 @@
 import React from "react";
-import { useUnits } from "@/lib/context/units-context";
+import { useUnitStore } from "@/lib/stores/unit-store";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
@@ -8,7 +8,8 @@ interface UnitToggleProps {
 }
 
 export function UnitsToggle({ className = "" }: UnitToggleProps) {
-  const { unit, setUnit } = useUnits();
+  const unitSystem = useUnitStore(state => state.unitSystem);
+  const setUnitSystem = useUnitStore(state => state.setUnitSystem);
 
   return (
     <div
@@ -20,21 +21,21 @@ export function UnitsToggle({ className = "" }: UnitToggleProps) {
       aria-label="Distance unit selection"
     >
       <Button
-        variant={unit === "km" ? "default" : "ghost"}
+        variant={unitSystem === "metric" ? "default" : "ghost"}
         type="button"
         role="radio"
-        aria-checked={unit === "km" ? "true" : "false"}
-        onClick={() => setUnit("km")}
+        aria-checked={unitSystem === "metric" ? "true" : "false"}
+        onClick={() => setUnitSystem("metric")}
         className="h-8 px-3 text-xs rounded-none"
       >
         km
       </Button>
       <Button
-        variant={unit === "mi" ? "default" : "ghost"}
+        variant={unitSystem === "imperial" ? "default" : "ghost"}
         type="button"
         role="radio"
-        aria-checked={unit === "mi" ? "true" : "false"}
-        onClick={() => setUnit("mi")}
+        aria-checked={unitSystem === "imperial" ? "true" : "false"}
+        onClick={() => setUnitSystem("imperial")}
         className="h-8 px-3 text-xs rounded-none"
       >
         mi

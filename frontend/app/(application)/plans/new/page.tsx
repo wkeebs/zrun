@@ -1,40 +1,36 @@
-// src/app/plans/new/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { planApi } from "@/lib/api/plans";
-import { ApiError } from "@/lib/utils/error";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { TrainingPlanForm, TrainingPlanFormValues } from "@/components/plans/plan-form";
+import { TrainingPlanForm } from "@/components/plans/plan-form";
+import { TrainingPlanFormValues } from "@/lib/types/plan";
+import { useMutation } from "@tanstack/react-query";
+import apiClient from "@/lib/api-client";
 
 export default function NewPlanPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (planData: TrainingPlanFormValues) => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      // Call the API to create the plan
-      const createdPlan = await planApi.createPlan(planData);
-      
-      // Redirect to the plan details page
-      router.push(`/plans/${createdPlan.id}`);
-    } catch (err) {
-      console.error("Error creating plan:", err);
-      
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-      
-      setIsSubmitting(false);
+  // Use TanStack Query mutation for creating a plan
+  const createPlanMutation = useMutation({
+    mutationFn: async (planData: TrainingPlanFormValues & { distanceInKm: number }) => {
+      const response = await apiClient.post('/plans', planData);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      router.push(`/plans/${data.id}`);
+    },
+    onError: (error: any) => {
+      console.error("Error creating plan:", error);
+      setError(error.response?.data?.message || "An unexpected error occurred. Please try again.");
     }
+  });
+
+  const handleSubmit = (planData: TrainingPlanFormValues & { distanceInKm: number }) => {
+    setError(null);
+    createPlanMutation.mutate(planData);
   };
 
   return (
@@ -49,7 +45,7 @@ export default function NewPlanPage() {
       
       <TrainingPlanForm 
         onSubmit={handleSubmit} 
-        isSubmitting={isSubmitting} 
+        isSubmitting={createPlanMutation.isPending} 
       />
     </div>
   );

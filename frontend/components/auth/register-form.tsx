@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 
 import {
   Card,
@@ -29,13 +30,11 @@ import {
   registerFormSchema,
   type RegisterFormValues,
 } from "@/lib/validations/auth";
-import { register } from "@/lib/api/auth";
+import apiClient from "@/lib/api-client";
 
 const RegisterForm = () => {
   const router = useRouter();
   const [error, setError] = React.useState<string>("");
-  const [success, setSuccess] = React.useState<boolean>(false);
-  const [loading, setLoading] = React.useState<boolean>(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -47,24 +46,28 @@ const RegisterForm = () => {
     },
   });
 
-  const onSubmit = async (values: RegisterFormValues) => {
-    try {
-      setError("");
-      setSuccess(false);
-      setLoading(true);
-
-      await register(values);
-      setSuccess(true);
-      router.push("/login");
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred");
-      }
-    } finally {
-      setLoading(false);
+  // Use TanStack Query mutation for registration
+  const registerMutation = useMutation({
+    mutationFn: async (data: RegisterFormValues) => {
+      const response = await apiClient.post('/auth/register', {
+        name: data.name,
+        email: data.email,
+        password: data.password
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      router.push("/auth/login?registered=true");
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message || "Registration failed";
+      setError(message);
     }
+  });
+
+  const onSubmit = (values: RegisterFormValues) => {
+    setError("");
+    registerMutation.mutate(values);
   };
 
   return (
@@ -157,10 +160,10 @@ const RegisterForm = () => {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
-                aria-busy={loading}
+                disabled={registerMutation.isPending}
+                aria-busy={registerMutation.isPending}
               >
-                {loading ? "Creating account..." : "Create Account"}
+                {registerMutation.isPending ? "Creating account..." : "Create Account"}
               </Button>
             </form>
           </Form>

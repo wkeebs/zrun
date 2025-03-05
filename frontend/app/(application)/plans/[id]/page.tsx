@@ -1,46 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { TrainingPlan } from '@/lib/api/plans';
-import { planApi } from '@/lib/api/plans';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import TrainingPlanView from '@/components/training-plan-view';
+import { useQuery } from '@tanstack/react-query';
+import apiClient from '@/lib/api-client';
+import { TrainingPlanFormValues as TrainingPlan } from '@/lib/types/plan';
 
 export default function PlanDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [plan, setPlan] = useState<TrainingPlan | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const planId = typeof params.id === 'string' ? params.id : String(params.id);
   
-  useEffect(() => {
-    const fetchPlan = async () => {
-      try {
-        if (params.id) {
-          const planId = typeof params.id === 'string' ? params.id : String(params.id);
-          setLoading(true);
-          const planData = await planApi.getPlanById(planId);
-          setPlan(planData);
-        }
-      } catch (err) {
-        console.error("Error fetching plan:", err);
-        setError("Failed to load the training plan. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchPlan();
-  }, [params.id]);
+  // Use TanStack Query to fetch the plan data
+  const { data: plan, isLoading, error } = useQuery({
+    queryKey: ['plans', planId],
+    queryFn: async () => {
+      const response = await apiClient.get<TrainingPlan>(`/plans/${planId}`);
+      return response.data;
+    },
+    enabled: !!planId // Only run the query if planId exists
+  });
   
   const handleEdit = (planId: string) => {
     router.push(`/plans/${planId}/edit`);
   };
   
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <LoadingSkeleton />
@@ -54,7 +43,9 @@ export default function PlanDetailPage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>
+            Failed to load the training plan. Please try again.
+          </AlertDescription>
         </Alert>
       </div>
     );
