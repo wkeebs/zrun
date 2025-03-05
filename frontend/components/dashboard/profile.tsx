@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
-import { withAuth } from "@/lib/auth/route-protection";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -254,4 +253,4 @@ const ProfilePage: React.FC = () => {
   );
 };
 
-export default withAuth(ProfilePage);
+export default ProfilePage;

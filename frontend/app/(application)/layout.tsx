@@ -2,9 +2,10 @@
 
 import Sidebar from "@/components/layout/sidebar";
 import TopNav from "@/components/layout/top-nav";
+import { withAuth } from "@/lib/auth/route-protection";
 import { useState } from "react";
 
-export default function DashboardLayout({
+function ApplicationLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -35,3 +36,5 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+export default withAuth(ApplicationLayout);
