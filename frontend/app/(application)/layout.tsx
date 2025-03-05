@@ -2,15 +2,26 @@
 
 import Sidebar from "@/components/layout/sidebar";
 import TopNav from "@/components/layout/top-nav";
-import { withAuth } from "@/lib/auth/route-protection";
+import { FullPageLoader } from "@/components/loading-spinner";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { redirect } from "next/navigation";
 
 function ApplicationLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { status } = useSession();
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  if (status === "loading") {
+    return <FullPageLoader />;
+  }
+
+  if (status === "unauthenticated") {
+    redirect("/auth/login");
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -37,4 +48,4 @@ function ApplicationLayout({
   );
 }
 
-export default withAuth(ApplicationLayout);
+export default ApplicationLayout;

@@ -12,18 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/lib/auth/auth-context";
 import { UnitsToggle } from "../units/units-toggle";
 import { ThemeToggle } from "../theme/theme-toggle";
+import { signOut } from "next-auth/react";
 
 export default function TopNav() {
-  const { user, logout } = useAuth();
-
   return (
     <nav className="w-full bg-background border-b px-6 py-3 flex items-center justify-between">
-      {/* Placeholder for potential breadcrumbs or page title */}
       <div className="flex-1">
-        {/* You can add breadcrumbs or page title here */}
       </div>
 
       {/* Navigation Actions */}
@@ -51,7 +47,7 @@ export default function TopNav() {
               <div className="flex flex-col space-y-1">
                 {/* <p className="text-sm font-medium leading-none">{user?.name}</p> */}
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
+                  {/* {user?.email} */}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -70,7 +66,7 @@ export default function TopNav() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={logout}
+              onSelect={() => signOut({ callbackUrl: "/" })}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" />

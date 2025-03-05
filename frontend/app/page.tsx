@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import ActionButton from '@/components/action-button';
+import { redirect } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 const phrases = ['Run Faster...', 'Race Better...', 'Go Further...'];
 
@@ -12,6 +13,11 @@ export default function LandingPage() {
   const [text, setText] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const { status } = useSession();
+  if (status === 'authenticated') {
+    redirect('/profile');
+  }
   
   useEffect(() => {
     setMounted(true);

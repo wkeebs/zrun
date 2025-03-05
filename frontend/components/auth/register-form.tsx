@@ -170,7 +170,7 @@ const RegisterForm = () => {
             Already have an account?{" "}
             <button
               type="button"
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/auth/login")}
               className="text-primary hover:underline font-medium"
             >
               Sign in

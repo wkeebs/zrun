@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "@/lib/auth/auth-context";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "../ui/progress";
+import { signOut } from "next-auth/react";
 
 interface UserStats {
   totalPlans: number;
@@ -30,7 +30,6 @@ interface Plan {
 type TabType = "overview" | "plans" | "stats";
 
 const ProfilePage: React.FC = () => {
-  const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("overview");
 
@@ -85,24 +84,24 @@ const ProfilePage: React.FC = () => {
         <Card className="lg:col-span-1">
           <CardHeader className="flex flex-row items-center gap-4">
             <Avatar className="h-14 w-14">
-              <AvatarImage src={user?.photoURL || ""} alt={user?.name || user?.email || "User"} />
-              <AvatarFallback>{getInitials(user?.email)}</AvatarFallback>
+              {/* <AvatarImage src={user?.photoURL || ""} alt={user?.name || user?.email || "User"} /> */}
+              {/* <AvatarFallback>{getInitials(user?.email)}</AvatarFallback> */}
             </Avatar>
             <div>
-              <CardTitle>{user?.name || "Runner"}</CardTitle>
-              <CardDescription>{user?.email}</CardDescription>
+              {/* <CardTitle>{user?.name || "Runner"}</CardTitle> */}
+              {/* <CardDescription>{user?.email}</CardDescription> */}
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <h3 className="text-sm font-medium mb-1">Account Type</h3>
-              <Badge>{user?.role || "Standard"}</Badge>
+              {/* <Badge>{user?.role || "Standard"}</Badge> */}
             </div>
             
             <div>
               <h3 className="text-sm font-medium mb-1">Member Since</h3>
               <p className="text-sm text-muted-foreground">
-                {user?.createdAt ? formatDate(user.createdAt) : "March 2025"}
+                {/* {user?.createdAt ? formatDate(user.createdAt) : "March 2025"} */}
               </p>
             </div>
             
@@ -126,7 +125,7 @@ const ProfilePage: React.FC = () => {
             <Button 
               variant="outline" 
               className="w-full" 
-              onClick={() => logout()}>
+              onClick={() => signOut({ callbackUrl: "/" })}>
               Sign Out
             </Button>
           </CardFooter>

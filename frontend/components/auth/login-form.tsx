@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { signIn } from "next-auth/react";
 
 import {
   Card,
@@ -25,15 +26,11 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { type LoginFormValues } from "@/lib/validations/auth";
-import { login } from "@/lib/api/auth";
-import { useAuth, User } from "@/lib/auth/auth-context";
 
 const LoginForm = () => {
   const router = useRouter();
   const [error, setError] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
-
-  const { login: loginUser } = useAuth();
 
   const form = useForm<LoginFormValues>({
     defaultValues: {
@@ -47,13 +44,21 @@ const LoginForm = () => {
       setError("");
       setLoading(true);
 
-      const response = await login(values);
+      // Use NextAuth signIn instead of direct API call
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+      });
 
-      // set auth
-      const { email, roles, token } = response;
-      loginUser(token, { email, roles } as User);
+      if (result?.error) {
+        setError("Invalid email or password");
+        return;
+      }
 
+      // NextAuth handles the session automatically
       router.push("/profile");
+      router.refresh(); // Refresh to update auth state in UI
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
