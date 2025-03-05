@@ -3,7 +3,6 @@
 import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { format, addWeeks } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -44,13 +43,12 @@ import { Slider } from "../ui/slider";
 import { Input } from "../ui/input";
 import { useEffect } from "react";
 import { TrainingPlanFormValues, RACE_DISTANCES, PLAN_LENGTHS, TARGET_GOALS, formSchema } from "@/lib/types/plan";
-import { useUnitStore } from "@/lib/stores/unit-store"; // Replace context with Zustand store
+import { useUnitStore } from "@/lib/stores/unit-store"; 
 
 const calculateEndDate = (planLength: number) => {
   return addWeeks(new Date(), planLength);
 };
 
-// Define the component props
 interface TrainingPlanFormProps {
   onSubmit?: (values: TrainingPlanFormValues & { distanceInKm: number }) => void;
   isSubmitting?: boolean;

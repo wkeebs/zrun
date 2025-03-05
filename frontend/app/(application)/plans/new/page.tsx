@@ -15,8 +15,10 @@ export default function NewPlanPage() {
 
   // Use TanStack Query mutation for creating a plan
   const createPlanMutation = useMutation({
-    mutationFn: async (planData: TrainingPlanFormValues & { distanceInKm: number }) => {
-      const response = await apiClient.post('/plans', planData);
+    mutationFn: async (
+      planData: TrainingPlanFormValues & { distanceInKm: number }
+    ) => {
+      const response = await apiClient.post("/plans", planData);
       return response.data;
     },
     onSuccess: (data) => {
@@ -24,17 +26,22 @@ export default function NewPlanPage() {
     },
     onError: (error: any) => {
       console.error("Error creating plan:", error);
-      setError(error.response?.data?.message || "An unexpected error occurred. Please try again.");
-    }
+      setError(
+        error.response?.data?.message ||
+          "An unexpected error occurred. Please try again."
+      );
+    },
   });
 
-  const handleSubmit = (planData: TrainingPlanFormValues & { distanceInKm: number }) => {
+  const handleSubmit = (
+    planData: TrainingPlanFormValues & { distanceInKm: number }
+  ) => {
     setError(null);
     createPlanMutation.mutate(planData);
   };
 
   return (
-    <div className="container py-6 space-y-6 mx-auto">      
+    <div className="container py-6 space-y-6 mx-auto">
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -42,10 +49,10 @@ export default function NewPlanPage() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
-      <TrainingPlanForm 
-        onSubmit={handleSubmit} 
-        isSubmitting={createPlanMutation.isPending} 
+
+      <TrainingPlanForm
+        onSubmit={handleSubmit}
+        isSubmitting={createPlanMutation.isPending}
       />
     </div>
   );

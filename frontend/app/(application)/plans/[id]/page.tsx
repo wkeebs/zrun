@@ -15,7 +15,6 @@ export default function PlanDetailPage() {
   const router = useRouter();
   const planId = typeof params.id === 'string' ? params.id : String(params.id);
   
-  // Use TanStack Query to fetch the plan data
   const { data: plan, isLoading, error } = useQuery({
     queryKey: ['plans', planId],
     queryFn: async () => {

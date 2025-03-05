@@ -44,7 +44,7 @@ const LoginForm = () => {
       setError("");
       setLoading(true);
 
-      // Use NextAuth signIn instead of direct API call
+      // Use NextAuth signIn
       const result = await signIn("credentials", {
         redirect: false,
         email: values.email,
@@ -56,9 +56,8 @@ const LoginForm = () => {
         return;
       }
 
-      // NextAuth handles the session automatically
       router.push("/profile");
-      router.refresh(); // Refresh to update auth state in UI
+      router.refresh();
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
